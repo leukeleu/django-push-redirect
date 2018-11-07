@@ -1,0 +1,27 @@
+version: '3.3'
+services:
+
+  nginx:
+    image: 'nginx:mainline-alpine'
+    restart: unless-stopped
+    volumes:
+      - './conf/certs:/etc/certs'
+      - './conf/nginx:/etc/nginx/conf.d'
+    ports:
+      - '80:80'
+      - '443:443'
+    depends_on:
+      - django
+
+  django:
+    image: django
+    build: '.'
+    restart: unless-stopped
+    volumes:
+      - '.:/django'
+    ports:
+      - '8000:8000'
+    stdin_open: true
+    tty: true
+    working_dir: '/django'
+    command: './manage.py runserver 0:8000'
