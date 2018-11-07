@@ -3,6 +3,8 @@
 This is a simple test project to try HTTP/2 Server Push redirects
 with Django and nginx.
 
+This approach requires nginx>=1.3.9
+
 
 ## Setup
 
@@ -58,7 +60,7 @@ The important Django bit is in `push_redirect/http.py`:
 
     from django.http import HttpResponsePermanentRedirect
 
-    class Http2PushPermanentRedirect(HttpResponsePermanentRedirect):
+    class Http2ServerPushPermanentRedirect(HttpResponsePermanentRedirect):
         def __init__(self, redirect_to, *args, **kwargs):
             super().__init__(redirect_to, *args, **kwargs)
             self['Link'] = f'<{self.url}>; rel=preload'
