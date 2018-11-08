@@ -20,7 +20,9 @@ In order to use HTTP/2 a certificate is required.
 [`minica`](https://github.com/jsha/minica) is a excellent tool
 to generate a root CA certificate and a certificate for `localhost`
 
-    minica -domains localhost
+```console
+minica -domains localhost
+```
 
 Then add the generated root CA file to the OS/browsers trust store
 and move the certificates for `localhost` to `./conf/certs`.
@@ -32,8 +34,10 @@ The expected file names for the certificates are `cert.pem` and `cert.key`.
 
 Once the certificates have been set up, run nginx and Django using:
 
-    docker-compose up -d
-    
+```console
+docker-compose up -d
+```
+
 Visiting the following urls in a modern browser should show the 
 difference between "normal" redirects and HTTP/2 Server Push redirects:
 
@@ -45,49 +49,51 @@ difference between "normal" redirects and HTTP/2 Server Push redirects:
 
 The most important bit of nginx configuration in `conf/nginx/default.conf` is:
 
-    server {
-      ...
-    
-      location @python {
-        ...
-        proxy_set_header X-Forwarded-Proto $scheme;
-        ...
-        http2_push_preload on;
-      }
-    }
+```nginx
+server {
+  ...
 
+  location @python {
+    ...
+    proxy_set_header X-Forwarded-Proto $scheme;
+    ...
+    http2_push_preload on;
+  }
+}
+```
 
 The most important Python/Django code is in `push_redirect/middleware.py`:
 
-    from django.utils.http import is_safe_url
+```python
+from django.utils.http import is_safe_url
 
-    class Http2ServerPushRedirectMiddleware:
-        redirect_status_codes = {301, 302}
+class Http2ServerPushRedirectMiddleware:
+    redirect_status_codes = {301, 302}
 
-        def __init__(self, get_response):
-            self.get_response = get_response
+    def __init__(self, get_response):
+        self.get_response = get_response
 
-        def should_preload(self, request, response):
-            return (
-                request.is_secure
-                and response.status_code in self.redirect_status_codes
-                and hasattr(response, 'url')
-                and not response.has_header('Link')
-            )
+    def should_preload(self, request, response):
+        return (
+            request.is_secure
+            and response.status_code in self.redirect_status_codes
+            and hasattr(response, 'url')
+            and not response.has_header('Link')
+        )
 
-        def __call__(self, request):
-            response = self.get_response(request)
-            if self.should_preload(request, response):
-                url = response.url
-                if is_safe_url(url, allowed_hosts={request.get_host()}, require_https=True):
-                    response['Link'] = f'<{url}>; rel=preload'
-        return response
+    def __call__(self, request):
+        response = self.get_response(request)
+        if self.should_preload(request, response):
+            url = response.url
+            if is_safe_url(url, allowed_hosts={request.get_host()}, require_https=True):
+                response['Link'] = f'<{url}>; rel=preload'
+    return response
+```
 
 This middleware adds the `Link rel=preload` header to redirect
-responses. But only if the redirect url is safe (same host or relative)
-and the request is secure.
+responses that should be preloaded.
 
-This middleware must be place **before** `CommonMiddleware`.
+This middleware must be placed **before** `CommonMiddleware`.
 
 
 ## Inspiration
