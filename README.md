@@ -8,34 +8,33 @@ This approach requires nginx>=1.3.9
 
 ## Setup
 
-This is a `docker-compose` project, do you'll need to download and
-install [Docker Desktop](https://www.docker.com/products/docker-desktop)
-to try this.
+This is a `docker-compose` project, download and install 
+[Docker Desktop](https://www.docker.com/products/docker-desktop)
+to run this.
 
 
 ### Certificates
 
-In order to use HTTP/2 it is required to get a certificate.
+In order to use HTTP/2 a certificate is required.
 
-I personally recommend to use [`minica`](https://github.com/jsha/minica)
-to generate a root CA cert and a cert for localhostL
+[`minica`](https://github.com/jsha/minica) is a excellent tool
+to generate a root CA certificate and a certificate for `localhost`
 
     minica -domains localhost
 
-Then add the generated root CA file to your OS/browsers trust store
-and move the certs for `localhost` to `./conf/certs`.
+Then add the generated root CA file to the OS/browsers trust store
+and move the certificates for `localhost` to `./conf/certs`.
 
-The expected filenames for the certs are `cert.pem` and `cert.key`.
+The expected file names for the certificates are `cert.pem` and `cert.key`.
 
 
 ## Run the project
 
-Once you've set up the certificates you should be able to start
-nginx and Django using:
+Once the certificates have been set up, run nginx and Django using:
 
     docker-compose up -d
     
-By visiting the following urls in a modern browser you should see the 
+Visiting the following urls in a modern browser should show the 
 difference between "normal" redirects and HTTP/2 Server Push redirects:
 
 * <http://localhost/hello/world> redirects to <http://localhost/hello/world/>
@@ -44,31 +43,42 @@ difference between "normal" redirects and HTTP/2 Server Push redirects:
 
 ### Code
 
-The important nginx bit is in `conf/nginx/default.conf`:
+The most important bit of nginx configuration in `conf/nginx/default.conf` is:
 
     server {
       ...
     
       location @python {
         ...
+        proxy_set_header X-Forwarded-Proto $scheme;
+        ...
         http2_push_preload on;
       }
     }
 
 
-The important Django bit is in `push_redirect/http.py`:
+The most important Python/Django code is in `push_redirect/middleware.py`:
 
-    from django.http import HttpResponsePermanentRedirect
+    from django.utils.http import is_safe_url
 
-    class Http2ServerPushPermanentRedirect(HttpResponsePermanentRedirect):
-        def __init__(self, redirect_to, *args, **kwargs):
-            super().__init__(redirect_to, *args, **kwargs)
-            self['Link'] = f'<{self.url}>; rel=preload'
+    class Http2ServerPushRedirectMiddleware:
+        def __init__(self, get_response):
+            self.get_response = get_response
+    
+        def __call__(self, request):
+            response = self.get_response(request)
+            if request.is_secure and response.status_code in {301, 302} and hasattr(response, 'url'):
+                url = response.url
+                if is_safe_url(url, allowed_hosts={request.get_host()}, require_https=True):
+                    response['Link'] = f'<{url}>; rel=preload'
+            return response
 
-This subclass of `HttpResponsePermanentRedirect` adds a second
-header that's used by nginx to push te resource.
 
-This subclass is used as the redirect class in `CommonMiddleware`.
+This middleware adds the `Link rel=preload` header to redirect
+responses. But only if the redirect url is safe (same host or relative)
+and the request is secure.
+
+This middleware must be place **before** `CommonMiddleware`.
 
 
 ## Inspiration
