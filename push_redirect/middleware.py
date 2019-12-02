@@ -18,7 +18,7 @@ class Http2ServerPushRedirectMiddleware:
             # The Django project should set:
             #
             #   SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-            raise MiddlewareNotUsed('SECURE_PROXY_SSL_HEADER is not configured')
+            raise MiddlewareNotUsed("SECURE_PROXY_SSL_HEADER is not configured")
         self.get_response = get_response
 
     def should_preload(self, request, response):
@@ -26,7 +26,7 @@ class Http2ServerPushRedirectMiddleware:
             # HTTP/2 requires SSL/TLS.
             return False
 
-        if not request.method == 'GET':
+        if not request.method == "GET":
             # Err on the side of caution by only preloading GET requests
             return False
 
@@ -34,26 +34,25 @@ class Http2ServerPushRedirectMiddleware:
             # Not a redirect
             return False
 
-        if not hasattr(response, 'url'):
+        if not hasattr(response, "url"):
             # The url attribute is added by the HttpResponseRedirectBase
             # base class. This response does not have it so ignore it.
             return False
 
-        if response.has_header('Link'):
+        if response.has_header("Link"):
             # There already is a Link header, don't overwrite it
             return False
 
         # Preload is enabled if the redirect url is on the same host
         # as the request and using the same protocol (https)
         return url_has_allowed_host_and_scheme(
-            response.url,
-            allowed_hosts={request.get_host()},
-            require_https=True)
+            response.url, allowed_hosts={request.get_host()}, require_https=True
+        )
 
     def __call__(self, request):
         response = self.get_response(request)
         if self.should_preload(request, response):
             # Response can be preloaded, add Link header
             url = response.url
-            response['Link'] = f'<{url}>; as=document; rel=preload'
+            response["Link"] = f"<{url}>; as=document; rel=preload"
         return response
