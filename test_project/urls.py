@@ -4,8 +4,8 @@ from django.utils import lorem_ipsum
 
 
 urlpatterns = [
-    path('', lambda request: HttpResponseRedirect(reverse('hello'))),
-    path('hello/', lambda request: HttpResponseRedirect(reverse('hello', kwargs={'name': 'world'})), name='hello'),
+    path('', lambda request: HttpResponseRedirect(reverse('hello').rstrip('/'))),
+    path('hello/', lambda request: HttpResponseRedirect(reverse('hello', kwargs={'name': 'world'}).rstrip('/')), name='hello'),
     path('hello/<name>/', lambda request, name: HttpResponse(
         f'<!doctype html>'
         f'<title>Hello {name}</title>'
