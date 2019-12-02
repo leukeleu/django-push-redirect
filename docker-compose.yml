@@ -2,7 +2,7 @@ version: '3.3'
 services:
 
   nginx:
-    image: 'nginx:mainline-alpine'
+    image: 'nginx:stable-alpine'
     restart: unless-stopped
     volumes:
       - './conf/certs:/etc/certs'
@@ -19,8 +19,6 @@ services:
     restart: unless-stopped
     volumes:
       - '.:/django'
-    ports:
-      - '8000:8000'
     stdin_open: true
     tty: true
     working_dir: '/django'
