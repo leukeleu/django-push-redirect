@@ -1,104 +1,66 @@
 # Django HTTP/2 Server Push redirects
 
-This is a simple test project to try HTTP/2 Server Push redirects
-with Django and nginx.
+A Django middleware adds a HTTP/2 Server Push header to plain
+Django redirect responses.
 
-This approach requires nginx>=1.3.9
+This approach requires Django to be proxied by a server with
+HTTP/2 Server Push support. E.g. `nginx>=1.3.9`, `apache2>=2.4.26` with 
+`mod_http2` enabled or a CDN services like Cloudflare.
 
+## Configuration
 
-## Setup
+First configure your webserver to enable HTTP/2 and enable server push.
 
-This is a `docker-compose` project, download and install 
-[Docker Desktop](https://www.docker.com/products/docker-desktop)
-to run this.
-
-
-### Certificates
-
-In order to use HTTP/2 a certificate is required.
-
-[`minica`](https://github.com/jsha/minica) is a excellent tool
-to generate a root CA certificate and a certificate for `localhost`
-
-```console
-minica -domains localhost
-```
-
-Then add the generated root CA file to the OS/browsers trust store
-and move the certificates for `localhost` to `./conf/certs`.
-
-The expected file names for the certificates are `cert.pem` and `cert.key`.
-
-
-## Run the project
-
-Once the certificates have been set up, run nginx and Django using:
-
-```console
-docker-compose up -d
-```
-
-Visiting the following urls in a modern browser should show the 
-difference between "normal" redirects and HTTP/2 Server Push redirects:
-
-* <http://localhost/hello/world> redirects to <http://localhost/hello/world/>
-* <https://localhost/hello/world> redirects to and pushes <https://localhost/hello/world/>
-
-
-### Code
-
-The most important bit of nginx configuration in `conf/nginx/default.conf` is:
+This looks something like this for nginx: 
 
 ```nginx
 server {
+  listen 443 ssl http2;
+  listen [::]:443 ssl http2;
   ...
 
   location @python {
-    ...
     proxy_set_header X-Forwarded-Proto $scheme;
-    ...
     http2_push_preload on;
+    ...
   }
 }
 ```
 
-The most important Python/Django code is in `push_redirect/middleware.py`:
+The configuration for Apache and other servers/services is left as an
+excercise for the reader ;-).
+
+Now make sure Django is able to detect if a request is secure by configuring
+the `SECURE_PROXY_SSL_HEADER` setting, e.g.:
 
 ```python
-from django.utils.http import is_safe_url
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+``` 
 
-class Http2ServerPushRedirectMiddleware:
-    redirect_status_codes = {301, 302}
+Then add `'push_redirect.middleware.Http2ServerPushRedirectMiddleware'`
+to your project's `MIDDLEWARE`, making sure it's **before** Django's
+`CommonMiddleware`:
 
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def should_preload(self, request, response):
-        return (
-            request.is_secure
-            and response.status_code in self.redirect_status_codes
-            and hasattr(response, 'url')
-            and not response.has_header('Link')
-        )
-
-    def __call__(self, request):
-        response = self.get_response(request)
-        if self.should_preload(request, response):
-            url = response.url
-            if is_safe_url(url, allowed_hosts={request.get_host()}, require_https=True):
-                response['Link'] = f'<{url}>; rel=preload'
-    return response
+```python
+MIDDLEWARE = [
+    ...
+    'push_redirect.middleware.Http2ServerPushRedirectMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    ...
+]
 ```
 
 This middleware adds the `Link rel=preload` header to redirect
 responses that should be preloaded.
 
-This middleware must be placed **before** `CommonMiddleware`.
-
+If everything is configured correctly you should see that redirects
+no longer require an extra request the the webserver.
 
 ## Inspiration
 
 * <https://twitter.com/simonw/status/1047865898717966337>
 * <https://www.ctrl.blog/entry/http2-push-redirects>
 * <https://www.nginx.com/blog/nginx-1-13-9-http2-server-push/>
+* <https://httpd.apache.org/docs/2.4/howto/http2.html#push>
+* <https://www.cloudflare.com/website-optimization/http2/serverpush/>
 * <https://code.djangoproject.com/ticket/29925>
