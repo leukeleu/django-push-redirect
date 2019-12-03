@@ -1,6 +1,6 @@
 # Django HTTP/2 Server Push redirects
 
-A Django middleware adds a HTTP/2 Server Push header to plain
+A Django middleware that adds a HTTP/2 Server Push header to plain
 Django redirect responses.
 
 This approach requires Django to be proxied by a server with
@@ -28,10 +28,10 @@ server {
 ```
 
 The configuration for Apache and other servers/services is left as an
-excercise for the reader ;-).
+exercise for the reader ;-).
 
-Now make sure Django is able to detect if a request is secure by configuring
-the `SECURE_PROXY_SSL_HEADER` setting, e.g.:
+Now make sure Django is able to detect if a request is secure 
+by configuring the `SECURE_PROXY_SSL_HEADER` setting, e.g.:
 
 ```python
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -56,7 +56,7 @@ responses that should be preloaded.
 If everything is configured correctly you should see that redirects
 no longer require an extra request the the webserver.
 
-## Inspiration
+## Inspiration / References
 
 * <https://twitter.com/simonw/status/1047865898717966337>
 * <https://www.ctrl.blog/entry/http2-push-redirects>
