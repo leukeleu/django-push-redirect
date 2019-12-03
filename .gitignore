@@ -1,2 +1,2 @@
 /conf/certs
-/test_project/db.sqlite3
+/tests/db.sqlite3

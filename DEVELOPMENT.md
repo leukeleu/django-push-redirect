@@ -12,7 +12,7 @@ In order to use HTTP/2 a certificate is required.
 [`minica`](https://github.com/jsha/minica) is a excellent tool
 to generate a root CA certificate and a certificate for `localhost`
 
-```console
+```shell script
 minica -domains localhost
 ```
 
@@ -26,7 +26,7 @@ The expected file names for the certificates are `cert.pem` and `cert.key`.
 
 Once the certificates have been set up, run nginx and Django using:
 
-```console
+```shell script
 docker-compose up -d
 ```
 
@@ -44,8 +44,27 @@ code style.
 
 Run the next set of commands to apply fixes and perform linting:
 
-```sh
+```shell script
 docker-compose exec django isort
 docker-compose exec django black .
 docker-compose exec django flake8
 ```
+
+
+## Testing/Coverage
+
+To run the unit tests run:
+ 
+```shell script
+docker-compose exec django python -W module ./manage.py test
+```
+
+To generate a coverage report run:
+ 
+```shell script
+docker-compose exec django coverage run ./manage.py test
+docker-compose exec django coverage report
+docker-compose exec django coverage html
+```
+
+The coverage report can be found in `./htmlcov`.

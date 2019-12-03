@@ -14,11 +14,11 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
 ]
 
-ROOT_URLCONF = "test_project.urls"
+ROOT_URLCONF = "tests.urls"
 
 TEMPLATES = [{"BACKEND": "django.template.backends.django.DjangoTemplates"}]
 
-WSGI_APPLICATION = "test_project.wsgi.application"
+WSGI_APPLICATION = "tests.wsgi.application"
 
 DATABASES = {
     "default": {

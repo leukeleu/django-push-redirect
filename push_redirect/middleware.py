@@ -22,7 +22,7 @@ class Http2ServerPushRedirectMiddleware:
         self.get_response = get_response
 
     def should_preload(self, request, response):
-        if not request.is_secure:
+        if not request.is_secure():
             # HTTP/2 requires SSL/TLS.
             return False
 
