@@ -1,6 +1,6 @@
-SECRET_KEY = "not-that-secret"
-
 import os
+
+SECRET_KEY = "not-that-secret"
 
 DEBUG = True
 
@@ -9,7 +9,8 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = []
 
 MIDDLEWARE = [
-    "push_redirect.middleware.Http2ServerPushRedirectMiddleware",  # Must come first to rewrite the response of CommonMiddleware
+    # Must come first to rewrite the response of CommonMiddleware
+    "push_redirect.middleware.Http2ServerPushRedirectMiddleware",
     "django.middleware.common.CommonMiddleware",
 ]
 

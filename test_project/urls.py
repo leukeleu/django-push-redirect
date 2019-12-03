@@ -2,7 +2,6 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import path, reverse
 from django.utils import lorem_ipsum
 
-
 urlpatterns = [
     path("", lambda request: HttpResponseRedirect(reverse("hello").rstrip("/"))),
     path(
