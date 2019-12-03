@@ -1,0 +1,18 @@
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude .DS_Store
+global-exclude Thumbs.db
+global-exclude Desktop.ini
+global-exclude *.swp
+global-exclude *~
+global-exclude *.bak
+include README.md
+include LICENSE
+include DEVELOPMENT.md
+include requirements-dev.txt
+include manage.py
+include docker-compose.yml
+include Dockerfile
+include conf/certs/.empty
+include conf/nginx/default.conf
+recursive-include test_project *.py
