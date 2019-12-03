@@ -82,3 +82,13 @@ class TestHttp2ServerPushRedirectMiddleware(TestCase):
             response, "https://www.google.com/", fetch_redirect_response=False
         )
         self.assertNotIn("Link", response)
+
+    def test_common_middleware(self):
+        """
+        Adds the preload header to redirects created by Django's
+        CommonMiddleware (APPEND_SLASH)
+        """
+        response = self.client.get("/hello/moon", secure=True)
+        self.assertRedirects(response, "/hello/moon/", 301, fetch_redirect_response=False)
+        self.assertIn("Link", response)
+        self.assertEqual("</hello/moon/>; as=document; rel=preload", response["Link"])
