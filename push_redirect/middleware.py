@@ -53,6 +53,5 @@ class Http2ServerPushRedirectMiddleware:
         response = self.get_response(request)
         if self.should_preload(request, response):
             # Response can be preloaded, add Link header
-            url = response.url
-            response["Link"] = f"<{url}>; as=document; rel=preload"
+            response["Link"] = f"<{response.url}>; as=document; rel=preload"
         return response
