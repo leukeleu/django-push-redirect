@@ -4,7 +4,7 @@ A Django middleware that adds a HTTP/2 Server Push header to plain
 Django redirect responses.
 
 This approach requires Django to be proxied by a server with
-HTTP/2 Server Push support. E.g. `nginx>=1.3.9`, `apache2>=2.4.26` with 
+HTTP/2 Server Push support. E.g. `nginx>=1.13.9`, `apache2>=2.4.26` with 
 `mod_http2` enabled or a CDN services like Cloudflare.
 
 ## Configuration
