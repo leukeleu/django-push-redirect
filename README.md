@@ -7,6 +7,14 @@ This approach requires Django to be proxied by a server with
 HTTP/2 Server Push support. E.g. `nginx>=1.13.9`, `apache2>=2.4.26` with 
 `mod_http2` enabled or a CDN services like Cloudflare.
 
+## Installation
+
+This package is available on PyPI and can be installed with `pip`:
+
+```shell
+pip install django-push-redirect
+```
+
 ## Configuration
 
 First configure your webserver to enable HTTP/2 and enable server push.
