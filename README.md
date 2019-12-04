@@ -36,7 +36,8 @@ server {
 ```
 
 The configuration for Apache and other servers/services is left as an
-exercise for the reader ;-).
+exercise for the reader (in other words, I don't know, please 
+contribute if you do!).
 
 Now make sure Django is able to detect if a request is secure 
 by configuring the `SECURE_PROXY_SSL_HEADER` setting, e.g.:
@@ -46,7 +47,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 ``` 
 
 Then add `'push_redirect.middleware.Http2ServerPushRedirectMiddleware'`
-to your project's `MIDDLEWARE`, making sure it's **before** Django's
+to your project's `MIDDLEWARE`, make sure it's **before** Django's
 `CommonMiddleware`:
 
 ```python
@@ -58,7 +59,7 @@ MIDDLEWARE = [
 ]
 ```
 
-This middleware adds the `Link rel=preload` header to redirect
+This middleware adds the `Link rel=preload` header on redirect
 responses that should be preloaded.
 
 If everything is configured correctly you should see that redirects
