@@ -1,7 +1,7 @@
 History
 =======
 
-1.1.0 (unreleased)
+1.1.0 (2020-02-19)
 ------------------
 
 - Add a way for responses to opt-out from push redirect  
