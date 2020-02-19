@@ -8,13 +8,13 @@ class CustomRedirectResponse(HttpResponse):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self['Location'] = '/custom-redirect/redirected/'
+        self["Location"] = "/custom-redirect/redirected/"
 
 
 class CustomLinkResponse(HttpResponseRedirect):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self['Link'] = '<https://www.google.com/>; rel=preconnect'
+        self["Link"] = "<https://www.google.com/>; rel=preconnect"
 
 
 urlpatterns = [

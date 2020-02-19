@@ -59,7 +59,7 @@ class TestHttp2ServerPushRedirectMiddleware(TestCase):
         # added by HttpResponseRedirectBae
         # self.assertRedirects(response, "/custom-redirect/redirected/", fetch_redirect_response=False)
         self.assertIn("Location", response)
-        self.assertEqual('/custom-redirect/redirected/', response['Location'])
+        self.assertEqual("/custom-redirect/redirected/", response["Location"])
         self.assertNotIn("Link", response)
 
     def test_existing_link_header_in_responses(self):
@@ -89,6 +89,8 @@ class TestHttp2ServerPushRedirectMiddleware(TestCase):
         CommonMiddleware (APPEND_SLASH)
         """
         response = self.client.get("/hello/moon", secure=True)
-        self.assertRedirects(response, "/hello/moon/", 301, fetch_redirect_response=False)
+        self.assertRedirects(
+            response, "/hello/moon/", 301, fetch_redirect_response=False
+        )
         self.assertIn("Link", response)
         self.assertEqual("</hello/moon/>; as=document; rel=preload", response["Link"])
