@@ -56,7 +56,7 @@ class TestHttp2ServerPushRedirectMiddleware(TestCase):
         """
         response = self.client.get("/custom-redirect/", secure=True)
         # Cannot use assertRedirects as it also requires the url attribute
-        # added by HttpResponseRedirectBae
+        # added by HttpResponseRedirectBase
         # self.assertRedirects(response, "/custom-redirect/redirected/", fetch_redirect_response=False)
         self.assertIn("Location", response)
         self.assertEqual("/custom-redirect/redirected/", response["Location"])
