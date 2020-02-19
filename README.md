@@ -65,6 +65,20 @@ responses that should be preloaded.
 If everything is configured correctly you should see that redirects
 no longer require an extra request the the webserver.
 
+## Response opt-out
+
+It is possible for a response to explicitly opt-out from the having
+a `preload` header added. This is done by setting `allow_push_redirect`
+to `False` on the `response` object, e.g.:
+
+```python
+def opt_out(request):
+    response = HttpResponseRedirect("/")
+    response.allow_push_redirect = False
+    return response
+```
+
+
 ## Inspiration / References
 
 * <https://twitter.com/simonw/status/1047865898717966337>

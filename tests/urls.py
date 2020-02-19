@@ -17,8 +17,15 @@ class CustomLinkResponse(HttpResponseRedirect):
         self["Link"] = "<https://www.google.com/>; rel=preconnect"
 
 
+def opt_out(request):
+    response = HttpResponseRedirect("/")
+    response.allow_push_redirect = False
+    return response
+
+
 urlpatterns = [
     path("", lambda request: HttpResponseRedirect(reverse("hello").rstrip("/"))),
+    path("opt-out/", opt_out, name="opt-out"),
     path(
         "hello/",
         lambda request: HttpResponseRedirect(
