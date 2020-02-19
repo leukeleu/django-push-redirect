@@ -15,6 +15,14 @@ class TestHttp2ServerPushRedirectMiddleware(TestCase):
             cm.output,
         )
 
+    def test_opt_out(self):
+        """
+        Does not add the preload header to responses that have opted out
+        """
+        response = self.client.get("/opt-out/")
+        self.assertRedirects(response, "/", fetch_redirect_response=False)
+        self.assertNotIn("Link", response)
+
     def test_non_secure_request(self):
         """
         Does not add the preload header redirects requested over HTTP

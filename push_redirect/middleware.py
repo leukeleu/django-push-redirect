@@ -22,6 +22,10 @@ class Http2ServerPushRedirectMiddleware:
         self.get_response = get_response
 
     def should_preload(self, request, response):
+        if not getattr(response, "allow_push_redirect", True):
+            # This response has explicitly opted out of push redirects
+            return False
+
         if not request.is_secure():
             # HTTP/2 requires SSL/TLS.
             return False
